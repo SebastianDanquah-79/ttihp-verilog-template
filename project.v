@@ -1,9 +1,9 @@
 # Tiny Tapeout project information
 project:
-  title:        ""      # Project title
-  author:       ""      # Your name
+  title:        "Adaptive Traffic Light Controller"      # Project title
+  author:       "Sebastian Danquah"      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  ""      # One line description of what your project does
+  description:  "Adaptive traffic light Asic with OR/AND logic gates"      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
 
@@ -12,7 +12,39 @@ project:
 
   # Your top module name must start with "tt_um_". Make it unique by including your github username:
   top_module:  "tt_um_example"
+module tt_um_example (
+    input  wire [7:0] ui_in,    // Dedicated inputs
+    output wire [7:0] uo_out,   // Dedicated outputs
+    input  wire [7:0] uio_in,   // IOs: Input path
+    output wire [7:0] uio_out,  // IOs: Output path
+    output wire [7:0] uio_oe,   // IOs: Enable path
+    input  wire ena,            // always 1 when powered
+    input  wire clk,            // clock
+    input  wire rst_n           // reset_n - low to reset
+);
 
+    // Inputs
+    wire sensor = ui_in[0];
+    wire timer  = ui_in[1];
+
+    // Combinational Logic Gates
+    wire red    = sensor;
+    wire green  = (~sensor) & (~timer);
+    wire yellow = timer;
+
+    // Outputs
+    assign uo_out[0] = red;
+    assign uo_out[1] = yellow;
+    assign uo_out[2] = green;
+    assign uo_out[7:3] = 5'b0;
+
+    assign uio_out = 8'b0;
+    assign uio_oe  = 8'b0;
+
+    // Suppress unused warnings
+    wire _unused = &{ena, clk, rst_n, ui_in[7:2], uio_in, 1'b0};
+
+endmodule
   # List your project's source files here.
   # Source files must be in ./src and you must list each source file separately, one per line.
   # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
